@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wall</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-default navbar-fixed-top bg-light">
+      <div class="container">
+        <div class="navbar-header">
+          <h1 class="navbar-brand" href="/">Coding Dojo Wall</h1>
+        </div>
+          <ul class="nav navbar-nav navbar-right">
+            
+            <li>Welcome {{request.session.first_name}}</li>
+            
+            <li><a href="/logout">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+        <form class="form" action="/post_message" method="post">
+            {% csrf_token %}
+            <label for='message' >
+                Post a message:
+            </label>
+            <textarea class="form-control" name="message"></textarea>
+            <input class=" btn btn-primary" type="submit" value="Post a message">
+        </form>
+    </div>
+    <div class="container">
+        {% for message in messages %}
+            <div class="container mt-5">
+                <h6>{{message.user.first_name}} {{message.user.last_name}} - {{message.created_at|date:"M d, Y"}}</h6>
+                {% if message.user.id == request.session.id %}
+                    <form action="/delete" method='post'>
+                        {% csrf_token %}
+                        <input type="hidden" name="message_id" value="{{message.id}}">
+                        <input type="submit" value="Delete" class="btn btn-danger">
+                    </form>
+
+                {% endif %}
+                    <p class="ml-2">{{message.message}}</p>
+                    {% for comment in message.comments.all %}
+                        <div class="ml-5"><h6>{{comment.user.first_name}} {{comment.user.last_name}} - {{comment.created_at|date:"M d, Y"}}</h6>
+                                
+                        <p>{{comment.comment}}</p></div>
+                    {% endfor %}
+                    <form class="form" action="/post_comment" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="message_id" value="{{message.id}}">
+                        <label for="comment">Post a comment</label>
+                        <textarea class="form-control" name="comment"></textarea>
+                        <input class="btn btn-success mt-2" type="submit" value="Post a comment">
+                    </form>
+                </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
